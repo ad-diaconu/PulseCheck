@@ -1,9 +1,11 @@
-from logging.config import dictConfig
 import logging
-from pythonjsonlogger import jsonlogger
 import os
+from logging.config import dictConfig
 
-ENVIRONMENT = os.getenv("ENVIRONMENT","local")
+from pythonjsonlogger import jsonlogger
+
+ENVIRONMENT = os.getenv("ENVIRONMENT", "local")
+
 
 class CustomJsonFormatter(jsonlogger.JsonFormatter):
     def add_fields(self, log_record, record, message_dict):
@@ -11,23 +13,22 @@ class CustomJsonFormatter(jsonlogger.JsonFormatter):
         # Add timesamps and standardized log levels for Cloud VMs (Datadog/AWS CloudWatch)
         if not log_record.get("timestamp"):
             log_record["timestamp"] = record.created
-        if log_record.get('level'):
-            log_record["level"] = log_record['level'].upper()
+        if log_record.get("level"):
+            log_record["level"] = log_record["level"].upper()
         else:
-            log_record['level'] = record.levelname
+            log_record["level"] = record.levelname
+
 
 # master config
 LOGGING_CONFIG = {
     "version": 1,
-    "disable_existing_loggers": False, # CRITICAL: This allows us to intercept Uvicorn's loggers
+    "disable_existing_loggers": False,  # CRITICAL: This allows us to intercept Uvicorn's loggers
     "formatters": {
         "json": {
             "()": CustomJsonFormatter,
-            "fmt": "%(timestamp)s %(level)s %(name)s %(message)s"
+            "fmt": "%(timestamp)s %(level)s %(name)s %(message)s",
         },
-        "standard": {
-            "format": "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
-        }
+        "standard": {"format": "%(asctime)s [%(levelname)s] %(name)s: %(message)s"},
     },
     "handlers": {
         "console": {
@@ -40,18 +41,20 @@ LOGGING_CONFIG = {
     "loggers": {
         # 1. FastAPI Application Logger
         "fastapi_app": {"handlers": ["console"], "level": "INFO", "propagate": False},
-        
         # 2. Uvicorn Base Logger
         "uvicorn": {"handlers": ["console"], "level": "INFO", "propagate": False},
-        
         # 3. Uvicorn Error Logger
         "uvicorn.error": {"level": "INFO"},
-        
         # 4. Uvicorn Access Logger (Logs every HTTP request)
-        "uvicorn.access": {"handlers": ["console"], "level": "INFO", "propagate": False},
+        "uvicorn.access": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
     },
 }
 
+
 def setup_logging():
     dictConfig(LOGGING_CONFIG)
-    return logging.getLogger("pulsecheck_app")
+    return logging.getLogger("fastapi_app")
