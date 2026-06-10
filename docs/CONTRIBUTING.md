@@ -1,6 +1,7 @@
 CONTRIBUTING.md
 
---
+---
+
 ## Branch naming convention
 
 All branches must adhere to the proposed naming convention. The branch name must match this pattern:
@@ -63,7 +64,7 @@ hotfix/                    # missing description
 random-branch-name         # no type prefix
 ```
 
--- 
+---
 
 ## Commit Guidelines
 
@@ -145,4 +146,4 @@ Update all API calls to use /v2/users instead.
 3. Reference issue numbers if applicable: `feat(auth): add OAuth2+OIDC auth (#123)`
 4. Use the body for detailed explanations if needed 
 
---
+---
