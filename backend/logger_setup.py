@@ -1,10 +1,18 @@
+# logger_setup.py
+"""
+Centralized Logging Configuration Module.
+"""
+
 import logging
 import os
 from logging.config import dictConfig
 
+from dotenv import load_dotenv
 from pythonjsonlogger import jsonlogger
 
-ENVIRONMENT = os.getenv("ENVIRONMENT", "local")
+load_dotenv()
+
+ENVIRONMENT = os.getenv("ENVIRONMENT")
 
 
 class CustomJsonFormatter(jsonlogger.JsonFormatter):
