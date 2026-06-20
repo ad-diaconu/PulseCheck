@@ -7,9 +7,11 @@ requires-python = ">=3.13"
 dependencies = [
     "bcrypt>=5.0.0",
     "fastapi>=0.136.1",
+    "httpx>=0.28.1",
     "psycopg2-binary>=2.9.12",
     "pydantic[email]>=2.13.4",
     "pyjwt>=2.13.0",
+    "pytest>=9.1.0",
     "python-dotenv>=1.2.2",
     "python-json-logger>=4.1.0",
     "sqlalchemy>=2.0.50",
