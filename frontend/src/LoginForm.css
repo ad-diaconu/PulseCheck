@@ -1,0 +1,138 @@
+/*LoginForm.css*/
+@import 'variables.css';
+
+.auth-page-container {
+    display: flex;
+    min-height: 100vh;
+    width: 100%;
+}
+
+/* 1. Branding (Stânga) */
+.auth-left-branding {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle at center, rgba(94, 231, 223, 0.15), transparent 70%);
+}
+
+.branding-content {
+    max-width: 400px;
+    padding: var(--space-xl);
+}
+
+.branding-icon {
+    font-size: 3rem;
+    display: block;
+    margin-bottom: var(--space-md);
+}
+
+/* 2. Formular (Dreapta) */
+.auth-right-form {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-xl);
+}
+
+.auth-right-form .glass-form::before {
+    display: none !important;
+    content: none !important;
+    background: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+.glass-form {
+    --reflection-top: linear-gradient(transparent, transparent) !important;
+    width: 100%;
+    max-width: 420px;
+    padding: var(--space-2xl);
+    background: rgba(255, 255, 255, 0.78) !important; /* Crește opacitatea ca să prindă formă */
+    border: 1px solid rgba(15, 23, 42, 0.15) !important; /* Bordură fină, dar vizibilă */
+    box-shadow: 0 20px 50px rgba(15, 23, 42, 0.08), var(--shadow-glass);
+}
+
+
+.social-auth-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-sm);
+    margin-top: var(--space-md); 
+    margin-bottom: var(--space-lg);
+}
+
+
+.social-btn {
+    color: #0f172a !important;
+}
+
+.auth-divider {
+    text-align: center;
+    margin: var(--space-md) 0;
+    font-size: var(--text-xs);
+    opacity: 0.5;
+    color: #334155;
+    position: relative;
+}
+
+
+.form-field {
+    margin-bottom: var(--space-md);
+}
+
+.form-field label {
+    display: block;
+    font-size: var(--text-xs);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: var(--space-xs);
+    color: #475569 !important; /* Gri închis elegant */
+    font-weight: 600;
+    opacity: 1 !important;
+}
+
+.glass-input {
+    color: #0f172a !important;
+    background: rgba(255, 255, 255, 0.6) !important;
+    border-color: rgba(15, 23, 42, 0.15) !important;
+}
+
+.glass-input::placeholder {
+    color: rgba(15, 23, 42, 0.45) !important; /* Placeholder gri, nu alb */
+}
+
+.submit-auth-btn {
+    width: 100%;
+    justify-content: center;
+    margin-top: var(--space-md);
+}
+
+.auth-switch-text {
+    margin-top: var(--space-lg);
+    text-align: center;
+    font-size: var(--text-sm);
+    color: #334155;
+}
+
+.auth-switch-text a {
+    color: #0891b2;
+    font-weight: 500;
+}
+
+.social-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-xs, 8px); /* spațiul dintre iconiță și text */
+    color: #0f172a !important;
+}
+
+/* Controlează dimensiunea exactă a iconiței tale */
+.social-icon-img {
+    width: 18px;
+    height: 18px;
+    object-fit: contain; /* se asigură că imaginea nu se deformează */
+    display: block;
+}
