@@ -1,14 +1,16 @@
 //LoginForm.jsx
 import React, { useState } from 'react';
-import { Link,useNavigate } from 'react-router-dom';
+import { Link,useNavigate, useSearchParams } from 'react-router-dom';
 import './LoginForm.css';
 
 import googleIcon from './assets/google-logo.svg'
 import githubIcon from './assets/github-logo.svg'
 
-export default function LoginForm() {
+export default function LoginForm({ setIsAuthenticated }) {
   const [loginData,setLoginData] = useState({email: '',pswd: ''});
   const [message, setMessage] = useState('');
+  const [searchParams] = useSearchParams();
+
   const navigate = useNavigate();
   const handleChange = (e) => {
     setLoginData({...loginData, [e.target.name]: e.target.value});
@@ -25,8 +27,10 @@ export default function LoginForm() {
       });
       const data = await response.json()
       if (response.ok) {
+        setIsAuthenticated(true);
         setMessage("Logged in successfully!");
-        navigate("/dashboard");
+        const nextRoute = searchParams.get('next') || "/dashboard";
+        navigate(nextRoute)
       } else {
         setMessage(data.message || data.detail)
       }
