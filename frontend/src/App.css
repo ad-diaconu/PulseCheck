@@ -160,10 +160,14 @@ a.glass-nav__item--active {
   z-index: 2001;
 }
 
-/* Pe desktop, forțăm meniul de mobil să stea ascuns și să nu se blocheze */
+/* Pe desktop, meniul de mobil e ascuns vizual dar poate fi deschis pe rezolutii mici */
 @media (min-width: 901px) {
   .navbar-menu {
-    display: none !important; /* Îl dezactivăm complet pe desktop */
+    display: none;
+    pointer-events: none;
+  }
+  .navbar-menu.open {
+    display: none;
   }
 }
 
@@ -179,12 +183,12 @@ a.glass-nav__item--active {
   }
   
   .navbar-menu {
-    top: 75px !important; /* Începe fix de unde se termină navbar-ul de mobil */
-    right: -100% !important; /* Îl scoatem fix cât lățimea lui în afara ecranului */
-    height: calc(100vh - 75px) !important;
-    margin-right: 0 !important; /* Ne asigurăm că nu există spațieri exterioare */
-    border-radius: 0 !important; /* Forțăm colțurile drepte */
-    border-right: none !important;
+    top: 75px ;
+    right: -100%;
+    height: calc(100vh - 75px);
+    margin-right: 0;
+    border-radius: 0;
+    border-right: none;
   }
 
   .navbar-menu.open {
@@ -242,6 +246,13 @@ a.glass-nav__item--active {
 
 .navbar-menu.open{
   right: 0;
+}
+
+.navbar-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  background: transparent;
 }
 
 .navbar-menu a {
