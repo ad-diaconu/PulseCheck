@@ -17,9 +17,33 @@ class InvalidCredentialsError(AppError):
     pass
 
 
+class UserNotFound(AppError):
+    pass
+
+
 class UserAlreadyExist(AppError):
     pass
 
 
 class TokenError(AppError):
+    pass
+
+
+class WorkspaceCreationError(AppError):
+    pass
+
+
+class WorkspaceNotFound(AppError):
+    pass
+
+
+class WorkspaceNoAuthorization(AppError):
+    pass
+
+
+class UserAlreadyInWorkspace(AppError):
+    pass
+
+
+class AdminCantBeRemoved(AppError):
     pass

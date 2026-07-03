@@ -6,12 +6,13 @@ This module handles core security operations: bcrypt password hashing, JWT token
 """
 
 import os
+import uuid
 from datetime import datetime, timedelta, timezone
 
 import bcrypt
 import jwt
 from exceptions import TokenError
-from fastapi import Request
+from fastapi import Depends, Request
 
 SECRET_KEY = os.getenv("SECRET_KEY", "secret_key")
 ALGORITHM = "HS256"  # symmetric key
@@ -55,3 +56,16 @@ def get_current_user_payload(request: Request) -> None:
         raise TokenError("Token has expired")
     except jwt.InvalidTokenError:
         raise TokenError("Invalid token")
+
+
+def get_current_user_id(payload: dict = Depends(get_current_user_payload)) -> uuid.UUID:
+    """
+    Obtains the already validated request and extracts only the user ID.
+    """
+    user_id = payload.get("sub")
+    if not user_id:
+        raise TokenError("User ID not found in token.")
+    try:
+        return uuid.UUID(user_id)
+    except ValueError:
+        raise TokenError("Invalid User ID format in token.")
