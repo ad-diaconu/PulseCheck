@@ -5,7 +5,10 @@ Pydantic Schemas Module.
 This module defines data validation models for incoming HTTP reqiests and response models used to serialize SQLAlchemy objects into secure JSON payloads.
 """
 
+# TODO: change all id str with uuid ? application breaks ?
 import re
+import uuid
+from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, EmailStr, field_validator
 
@@ -36,7 +39,29 @@ class UserLogin(BaseModel):
 class UserResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)  # pydantic reads sqlalchemy
 
-    id: str
+    id: uuid.UUID
     email: str
     role: str
     is_active: bool
+
+
+class WorkspaceCreate(BaseModel):
+    name: str
+
+
+class WorkspaceUpdate(BaseModel):
+    name: str
+
+
+class MemberCreate(BaseModel):
+    id: uuid.UUID
+    role: str = "Viewer"
+
+
+class WorkspaceReturn(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    name: str
+    created_at: datetime
+    updated_at: datetime
