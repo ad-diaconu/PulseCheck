@@ -10,6 +10,7 @@ import re
 import uuid
 from datetime import datetime
 
+from models.monitor import MonitorStatus
 from pydantic import BaseModel, ConfigDict, EmailStr, field_validator
 
 
@@ -65,3 +66,35 @@ class WorkspaceReturn(BaseModel):
     name: str
     created_at: datetime
     updated_at: datetime
+
+
+class MonitorCreate(BaseModel):
+    workspace_id: uuid.UUID
+    name: str
+    url: str
+    interval_minutes: int
+
+
+class MonitorResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    workspace_id: uuid.UUID
+    name: str
+    url: str
+    status: MonitorStatus
+    interval_minutes: int
+    created_at: datetime
+    updated_at: datetime
+
+
+class MonitorListResponse(BaseModel):
+    monitors: list[MonitorResponse]
+
+
+# NOTE: a create model should include only fields that are given by frontend
+# for the creation. if id and other fields are generated they do not need
+# to be included
+# however if there is a FK id, it is needed to be delivered from the frontend
+# so it can be included in a Create Model
+# but if its already in endpoint it becomes redundant in Create Model
