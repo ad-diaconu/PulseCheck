@@ -9,6 +9,7 @@ import uuid
 from datetime import datetime, timezone
 
 from database import Base
+from models.ping_history import PingHistory
 from models.workspace import Workspace
 from sqlalchemy import DateTime, ForeignKey, Integer, String, Uuid
 from sqlalchemy import Enum as SAEnum
@@ -45,3 +46,6 @@ class Monitor(Base):
         onupdate=lambda: datetime.now(timezone.utc),
     )
     workspace: Mapped["Workspace"] = relationship(back_populates="monitor_associations")
+    ping_history_associations: Mapped[list["PingHistory"]] = relationship(
+        back_populates="monitor", cascade="all, delete-orphan"
+    )

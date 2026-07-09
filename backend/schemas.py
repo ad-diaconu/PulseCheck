@@ -9,9 +9,10 @@ This module defines data validation models for incoming HTTP reqiests and respon
 import re
 import uuid
 from datetime import datetime
+from typing import Optional
 
 from models.monitor import MonitorStatus
-from pydantic import BaseModel, ConfigDict, EmailStr, field_validator
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
 
 # input schemas
@@ -69,10 +70,16 @@ class WorkspaceReturn(BaseModel):
 
 
 class MonitorCreate(BaseModel):
-    workspace_id: uuid.UUID
     name: str
     url: str
     interval_minutes: int
+
+
+class MonitorUpdate(BaseModel):
+    name: str | None = None
+    url: str | None = None
+    interval_minutes: int | None = None
+    status: MonitorStatus | None = None
 
 
 class MonitorResponse(BaseModel):
@@ -90,6 +97,12 @@ class MonitorResponse(BaseModel):
 
 class MonitorListResponse(BaseModel):
     monitors: list[MonitorResponse]
+
+
+class MonitorBulkDelete(BaseModel):
+    monitor_ids: list[uuid.UUID] = Field(
+        ..., min_lenght=1, description="List of monitor ids to be deleted"
+    )
 
 
 # NOTE: a create model should include only fields that are given by frontend
