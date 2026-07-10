@@ -9,8 +9,11 @@ import uuid
 from datetime import datetime, timezone
 
 from database import Base
+from models.user import User
 from sqlalchemy import DateTime, ForeignKey, String, Uuid
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from backend.models.monitor import Monitor
 
 
 class WorkspaceUser(Base):
@@ -49,5 +52,8 @@ class Workspace(Base):
         ),  # onupdate takes the 'current' update time
     )
     user_associations: Mapped[list["WorkspaceUser"]] = relationship(
+        back_populates="workspace", cascade="all, delete-orphan"
+    )
+    monitor_associations: Mapped[list["Monitor"]] = relationship(
         back_populates="workspace", cascade="all, delete-orphan"
     )

@@ -9,8 +9,10 @@ This module defines data validation models for incoming HTTP reqiests and respon
 import re
 import uuid
 from datetime import datetime
+from typing import Optional
 
-from pydantic import BaseModel, ConfigDict, EmailStr, field_validator
+from models.monitor import MonitorStatus
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
 
 # input schemas
@@ -65,3 +67,47 @@ class WorkspaceReturn(BaseModel):
     name: str
     created_at: datetime
     updated_at: datetime
+
+
+class MonitorCreate(BaseModel):
+    name: str
+    url: str
+    interval_minutes: int
+
+
+class MonitorUpdate(BaseModel):
+    name: str | None = None
+    url: str | None = None
+    interval_minutes: int | None = None
+    status: MonitorStatus | None = None
+
+
+class MonitorResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    workspace_id: uuid.UUID
+    name: str
+    url: str
+    status: MonitorStatus
+    interval_minutes: int
+    created_at: datetime
+    updated_at: datetime
+
+
+class MonitorListResponse(BaseModel):
+    monitors: list[MonitorResponse]
+
+
+class MonitorBulkDelete(BaseModel):
+    monitor_ids: list[uuid.UUID] = Field(
+        ..., min_lenght=1, description="List of monitor ids to be deleted"
+    )
+
+
+# NOTE: a create model should include only fields that are given by frontend
+# for the creation. if id and other fields are generated they do not need
+# to be included
+# however if there is a FK id, it is needed to be delivered from the frontend
+# so it can be included in a Create Model
+# but if its already in endpoint it becomes redundant in Create Model

@@ -262,6 +262,9 @@ def edit_workspace_name_by_workspace_id(
         raise WorkspaceNoAuthorization("You are not authorized to edit this workspace.")
 
     # workspace_user(s) are linked by id so no junction table logic needed.
+    # TODO: return message needs to be changed
+    # the industry standard is to return 200 status code along with only the newly created object
+    # entirely omitting additional message "Workspace name changed successfully."
     workspace.name = workspace_data.name
     db.commit()
     db.refresh(workspace)

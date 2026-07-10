@@ -10,6 +10,7 @@ import uuid
 from datetime import datetime, timezone
 
 from database import Base
+from models.workspace import WorkspaceUser
 from sqlalchemy import Boolean, DateTime, String, Uuid
 from sqlalchemy import Enum as SAEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
