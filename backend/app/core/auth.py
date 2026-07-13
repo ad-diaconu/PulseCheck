@@ -11,8 +11,9 @@ from datetime import datetime, timedelta, timezone
 
 import bcrypt
 import jwt
-from exceptions import TokenError
 from fastapi import Depends, Request
+
+from backend.app.core.exceptions import TokenError
 
 SECRET_KEY = os.getenv("SECRET_KEY", "secret_key")
 ALGORITHM = "HS256"  # symmetric key

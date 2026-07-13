@@ -8,10 +8,11 @@ Contains the declarative base definitions for the ping_history database table.
 import uuid
 from datetime import datetime, timezone
 
-from database import Base
-from models.monitor import Monitor
 from sqlalchemy import BigInteger, DateTime, ForeignKey, Integer, Uuid
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from backend.app.db.database import Base
+from backend.app.models.monitor import Monitor
 
 
 class PingHistory(Base):

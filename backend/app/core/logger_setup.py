@@ -15,6 +15,48 @@ load_dotenv()
 ENVIRONMENT = os.getenv("ENVIRONMENT")
 
 
+class CustomStandardFormatter(logging.Formatter):
+    def format(self, record):
+        original_message = super().format(record)
+
+        reserved_keys = {
+            "name",
+            "msg",
+            "args",
+            "levelname",
+            "levelno",
+            "pathname",
+            "filename",
+            "module",
+            "exc_info",
+            "exc_text",
+            "stack_info",
+            "lineno",
+            "funcName",
+            "created",
+            "msecs",
+            "relativeCreated",
+            "thread",
+            "threadName",
+            "processName",
+            "process",
+            "message",
+            "asctime",
+            "timestamp",
+            "level",
+        }
+
+        extra_data = {
+            k: v for k, v in record.__dict__.items() if k not in reserved_keys
+        }
+
+        if extra_data:
+            context_str = ", ".join(f"{k}={v}" for k, v in extra_data.items())
+            original_message += f" \033[90m| Context: [{context_str}]\033[0m"
+
+        return original_message
+
+
 class CustomJsonFormatter(jsonlogger.JsonFormatter):
     def add_fields(self, log_record, record, message_dict):
         super(CustomJsonFormatter, self).add_fields(log_record, record, message_dict)
@@ -36,7 +78,10 @@ LOGGING_CONFIG = {
             "()": CustomJsonFormatter,
             "fmt": "%(timestamp)s %(level)s %(name)s %(message)s",
         },
-        "standard": {"format": "%(asctime)s [%(levelname)s] %(name)s: %(message)s"},
+        "standard": {
+            "()": CustomStandardFormatter,
+            "format": "%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+        },
     },
     "handlers": {
         "console": {

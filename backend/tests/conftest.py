@@ -3,16 +3,17 @@
 Global pyest fixtures and test database setup.
 """
 
-import auth
 import pytest
-from database import Base, get_db
 from fastapi.testclient import TestClient
-from main import app
-from models.user import User
-from models.workspace import Workspace, WorkspaceUser
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
+
+import backend.app.core.auth as auth
+from backend.app.db.database import Base, get_db
+from backend.app.main import app
+from backend.app.models.user import User
+from backend.app.models.workspace import Workspace, WorkspaceUser
 
 SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"  # RAM
 
