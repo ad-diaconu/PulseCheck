@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "bcrypt>=5.0.0",
+    "black>=26.5.1",
     "fastapi>=0.136.1",
     "httpx>=0.28.1",
     "psycopg2-binary>=2.9.12",
@@ -14,6 +15,7 @@ dependencies = [
     "pytest>=9.1.0",
     "python-dotenv>=1.2.2",
     "python-json-logger>=4.1.0",
+    "ruff>=0.15.21",
     "sqlalchemy>=2.0.50",
     "uvicorn>=0.48.0",
 ]

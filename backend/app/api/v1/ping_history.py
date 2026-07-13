@@ -9,27 +9,22 @@ import uuid
 from enum import Enum
 from typing import Optional
 
-from auth import get_current_user_id
-from database import get_db
-
-#  from exceptions import (...)
-from fastapi import APIRouter, Depends, Query, status
-from models.ping_history import PingHistory
-from models.workspace import Monitor, Workspace, WorkspaceUser
-from schemas import (
-    MonitorBulkDelete,
-    MonitorCreate,
-    MonitorListResponse,
-    MonitorResponse,
-    MonitorStatus,
-    MonitorUpdate,
-)
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from backend.app.core.auth import get_current_user_id
+from backend.app.core.exceptions import (
+    MonitorNotFoundError,
+)
+from backend.app.db.database import get_db
+from backend.app.models.ping_history import PingHistory
+from backend.app.models.workspace import Monitor, WorkspaceUser
+from backend.app.schemas.ping_history import PingHistoryListResponse
+
 logger = logging.getLogger("fastapi_app")
 
-router = APIRouter(tags=["Ping History"])
+router_ping_history = APIRouter(tags=["Ping History"])
 
 
 class PingSortField(str, Enum):
@@ -42,7 +37,11 @@ class SortOrder(str, Enum):
     desc = "desc"
 
 
-@router.get("/{monitor_id}/pings")
+@router_ping_history.get(
+    "/{monitor_id}/pings",
+    response_model=PingHistoryListResponse,
+    summary="Fetch ping history for a specific monitor",
+)
 def get_pings(
     monitor_id: uuid.UUID,
     db: Session = Depends(get_db),
@@ -62,11 +61,13 @@ def get_pings(
         )
     )
 
-    monitor: Monitor = db.execute(statement=stmt_check_access).scalar_one_or_none()
+    monitor: Monitor = db.execute(stmt_check_access).scalar_one_or_none()
     if not monitor:
-        logger.warning("somethings")
-        # MonitorNotFound
-        raise Exception("something")
+        logger.warning(
+            "User attempted to access monitor without permission or monitor does not exist.",
+            extra={"user_id": current_user_id, "monitor_id": monitor_id},
+        )
+        raise MonitorNotFoundError("Monitor not found or access denied.")
 
     stmt_get_pings = select(PingHistory).where(PingHistory.monitor_id == monitor_id)
 
@@ -87,7 +88,15 @@ def get_pings(
 
     pings = db.execute(stmt_get_pings).scalars().all()
 
-    # XXX: add a respones model listPings
+    logger.info(
+        "User fetched ping history",
+        extra={
+            "user_id": current_user_id,
+            "monitor_id": monitor_id,
+            "returned_count": len(pings),
+        },
+    )
+
     return {"pings": pings}
 
 

@@ -8,12 +8,11 @@ import enum
 import uuid
 from datetime import datetime, timezone
 
-from database import Base
-from models.ping_history import PingHistory
-from models.workspace import Workspace
 from sqlalchemy import DateTime, ForeignKey, Integer, String, Uuid
 from sqlalchemy import Enum as SAEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from backend.app.db.database import Base
 
 
 class MonitorStatus(str, enum.Enum):

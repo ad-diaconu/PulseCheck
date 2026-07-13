@@ -7,17 +7,18 @@ This module contains FastAPI endpoints that require a valid authentication token
 
 import logging
 
-from auth import get_current_user_payload
-from database import get_db
 from fastapi import APIRouter, Depends
-from models import User
-from schemas import UserResponse
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from backend.app.core.auth import get_current_user_payload
+from backend.app.db.database import get_db
+from backend.app.models.user import User
+from backend.app.schemas.user import UserResponse
+
 logger = logging.getLogger("fastapi_app")
 
-router_protected = APIRouter()
+router_protected = APIRouter(tags=["Protected Routes"])
 
 
 @router_protected.get("/me")

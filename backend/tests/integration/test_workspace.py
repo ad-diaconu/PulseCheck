@@ -47,7 +47,7 @@ def test_get_workspace_by_unauthorized_id(auth_client, unauthorized_workspace):
 def test_get_workspace_members_success(
     auth_client, owned_workspace, other_user, db_session
 ):
-    from models.workspace import WorkspaceUser
+    from backend.app.models.workspace import WorkspaceUser
 
     link = WorkspaceUser(
         user_id=other_user.id, workspace_id=owned_workspace.id, role="Viewer"
@@ -67,7 +67,7 @@ def test_get_workspace_members_success(
 def test_get_workspace_members_filter_by_role(
     auth_client, owned_workspace, other_user, db_session
 ):
-    from models.workspace import WorkspaceUser
+    from backend.app.models.workspace import WorkspaceUser
 
     link = WorkspaceUser(
         user_id=other_user.id, workspace_id=owned_workspace.id, role="Viewer"
@@ -88,7 +88,7 @@ def test_get_workspace_members_filter_by_role(
 def test_get_workspace_members_pagination(
     auth_client, owned_workspace, other_user, db_session
 ):
-    from models.workspace import WorkspaceUser
+    from backend.app.models.workspace import WorkspaceUser
 
     link = WorkspaceUser(
         user_id=other_user.id, workspace_id=owned_workspace.id, role="Viewer"
@@ -127,7 +127,7 @@ def test_create_workspace(auth_client, db_session):
 
     import uuid
 
-    from models.workspace import Workspace
+    from backend.app.models.workspace import Workspace
 
     created_workspace = db_session.get(Workspace, uuid.UUID(data["workspace"]["id"]))
     assert created_workspace is not None
@@ -165,7 +165,7 @@ def test_create_workspace_db_error_triggers_rollback(auth_client, db_session):
 
     assert response.status_code == 500
 
-    from models.workspace import Workspace
+    from backend.app.models.workspace import Workspace
 
     workspaces = (
         db_session.query(Workspace).filter(Workspace.name == "Error Workspace").all()
@@ -218,7 +218,7 @@ def test_delete_workspace_success(auth_client, owned_workspace, db_session):
     assert response.status_code == 200
     assert response.json()["message"] == "Workspace successfully deleted."
 
-    from models.workspace import Workspace
+    from backend.app.models.workspace import Workspace
 
     deleted_workspace = db_session.get(Workspace, owned_workspace.id)
     assert deleted_workspace is None
@@ -227,7 +227,7 @@ def test_delete_workspace_success(auth_client, owned_workspace, db_session):
 @pytest.mark.integration
 @pytest.mark.workspace
 def test_remove_member_success(auth_client, owned_workspace, other_user, db_session):
-    from models.workspace import WorkspaceUser
+    from backend.app.models.workspace import WorkspaceUser
 
     link = WorkspaceUser(
         user_id=other_user.id, workspace_id=owned_workspace.id, role="Viewer"
@@ -262,7 +262,7 @@ def test_leave_workspace_success(client, member_workspace, other_user, db_sessio
     assert response.status_code == 200
     assert response.json()["message"] == "You have successfully left the workspace."
 
-    from models.workspace import WorkspaceUser
+    from backend.app.models.workspace import WorkspaceUser
 
     link = (
         db_session.query(WorkspaceUser)

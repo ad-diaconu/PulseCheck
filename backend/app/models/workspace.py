@@ -8,12 +8,12 @@ Contains the declarative base definitions for the workspace and workspace_users 
 import uuid
 from datetime import datetime, timezone
 
-from database import Base
-from models.user import User
 from sqlalchemy import DateTime, ForeignKey, String, Uuid
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from backend.models.monitor import Monitor
+from backend.app.db.database import Base
+from backend.app.models.monitor import Monitor
+from backend.app.models.user import User
 
 
 class WorkspaceUser(Base):
