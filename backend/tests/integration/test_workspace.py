@@ -206,8 +206,7 @@ def test_edit_workspace_name_success(auth_client, owned_workspace):
 
     assert response.status_code == 200
     data = response.json()
-    assert data["message"] == "Workspace name changed successfully."
-    assert data["new_name"] == "Nume Nou Workspace"
+    assert data["name"] == "Nume Nou Workspace"
 
 
 @pytest.mark.integration

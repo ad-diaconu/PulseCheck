@@ -64,7 +64,7 @@ def list_workspace_monitors(
 
     if name:
         # use ilike for case-insensitive search (e.g. ?name=AWS | ?name=aws)
-        stmt_get_monitors = stmt_get_monitors.where(Monitor.name.ilike(f"%{name}"))
+        stmt_get_monitors = stmt_get_monitors.where(Monitor.name.ilike(f"%{name}%"))
 
     stmt_get_monitors = stmt_get_monitors.offset(skip).limit(limit)
 

@@ -12,6 +12,8 @@ from sqlalchemy.pool import StaticPool
 import backend.app.core.auth as auth
 from backend.app.db.database import Base, get_db
 from backend.app.main import app
+from backend.app.models.monitor import Monitor, MonitorStatus
+from backend.app.models.ping_history import PingHistory
 from backend.app.models.user import User
 from backend.app.models.workspace import Workspace, WorkspaceUser
 
@@ -129,6 +131,76 @@ def unauthorized_workspace(db_session, other_user):
     db_session.commit()
     db_session.refresh(workspace)
     return workspace
+
+
+# --- MONITOR ---
+@pytest.fixture
+def viewer_client(client, other_user):
+    """
+    Authenticates 'other_user' which is a Viewer in member_workspace.
+    """
+    payload = {"email": other_user.email, "password": "Password1234!"}
+    client.post("/login", json=payload)
+    return client
+
+
+@pytest.fixture
+def sample_monitor(db_session, owned_workspace) -> Monitor:
+    """
+    Creates a sample monitor in the test_user's owned workspace.
+    """
+    monitor: Monitor = Monitor(
+        workspace_id=owned_workspace.id,
+        name="Test API Monitor",
+        url="https://api.example.com/health",
+        interval_minutes=5,
+        status=MonitorStatus.pending.value,
+    )
+    db_session.add(monitor)
+    db_session.commit()
+    db_session.refresh(monitor)
+    return monitor
+
+
+@pytest.fixture
+def unauthorized_monitor(db_session, unauthorized_workspace) -> Monitor:
+    """
+    Creates a monitor in a workspace the test_user does not have access to.
+    """
+    monitor: Monitor = Monitor(
+        workspace_id=unauthorized_workspace.id,
+        name="Secret Monitor",
+        url="https://secret.example.com",
+        interval_minutes=10,
+        status=MonitorStatus.up.value,
+    )
+    db_session.add(monitor)
+    db_session.commit()
+    db_session.refresh(monitor)
+    return monitor
+
+
+# --- PING_HISTORY ---
+@pytest.fixture
+def sample_ping_history(db_session, sample_monitor):
+    """Test History Table Fixture"""
+    pings = [
+        PingHistory(
+            monitor_id=sample_monitor.id,
+            status_code=200,
+            latency_ms=150,
+        ),
+        PingHistory(
+            monitor_id=sample_monitor.id,
+            status_code=500,
+            latency_ms=800,
+        ),
+    ]
+    db_session.add_all(pings)
+    db_session.commit()
+    for ping in pings:
+        db_session.refresh(ping)
+    return pings
 
 
 # --- CONFIG ---
