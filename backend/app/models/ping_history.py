@@ -18,9 +18,7 @@ from backend.app.models.monitor import Monitor
 class PingHistory(Base):
     __tablename__ = "ping_history"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        BigInteger, primary_key=True, autoincrement=True
-    )
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
     monitor_id: Mapped[uuid.UUID] = mapped_column(
         Uuid, ForeignKey("monitors.id", ondelete="CASCADE"), nullable=False
     )

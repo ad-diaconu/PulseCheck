@@ -17,15 +17,55 @@ from backend.app.models.ping_history import PingHistory
 from backend.app.models.user import User
 from backend.app.models.workspace import Workspace, WorkspaceUser
 
-SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"  # RAM
-
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL,
-    connect_args={"check_same_thread": False},
-    poolclass=StaticPool,  # same conexion for the test suite
+POSTGRESQL_DATABASE_URL = (
+    "postgresql://test_user:test_password@localhost:5433/test_db"  # RAM
 )
 
-TestingSessionLocal = sessionmaker(autocommit=False, bind=engine)
+# --- CONFIG ---
+
+
+@pytest.fixture(scope="session")
+def engine():
+
+    engine = create_engine(POSTGRESQL_DATABASE_URL)
+
+    Base.metadata.create_all(bind=engine)
+    yield engine
+    Base.metadata.drop_all(bind=engine)
+
+
+@pytest.fixture(scope="function")
+def db_session(engine):
+    """
+    Createst tables before test and delete them afterwards.
+    Executed before each test function. Offers isolation through transaction rollback.
+    """
+    connection = engine.connect()
+    transaction = connection.begin()
+    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=connection)
+    session = SessionLocal()
+
+    yield session  # here the test function will run
+
+    # after test function, rollback the transaction and close the session
+    session.close()
+    transaction.rollback()
+    connection.close()
+
+
+@pytest.fixture(scope="function")
+def client(db_session):
+    """Test client that mimics test database."""
+
+    def override_get_db():
+        yield db_session
+
+    app.dependency_overrides[get_db] = override_get_db
+
+    with TestClient(app) as test_client:
+        yield test_client
+
+    app.dependency_overrides.clear()
 
 
 # --- AUTH ---
@@ -201,31 +241,3 @@ def sample_ping_history(db_session, sample_monitor):
     for ping in pings:
         db_session.refresh(ping)
     return pings
-
-
-# --- CONFIG ---
-@pytest.fixture(scope="function")
-def db_session():
-    """Creates tables before test and delete them afterwards."""
-    Base.metadata.create_all(bind=engine)
-    db = TestingSessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-        Base.metadata.drop_all(bind=engine)
-
-
-@pytest.fixture(scope="function")
-def client(db_session):
-    """Test client that mimics test database."""
-
-    def override_get_db():
-        yield db_session
-
-    app.dependency_overrides[get_db] = override_get_db
-
-    with TestClient(app) as test_client:
-        yield test_client
-
-    app.dependency_overrides.clear()
