@@ -21,7 +21,7 @@ from backend.app.core.exceptions import TokenError
 
 def test_password_hashing():
     """Test that password hashes are generated correctly and verify successfully."""
-    plain_password = "super_secret_passowrd_123"
+    plain_password = "super_secret_password_123"
 
     hashed = get_password_hash(plain_password)
 
@@ -30,9 +30,9 @@ def test_password_hashing():
     assert verify_password("wrong_password", hashed) is False
 
 
-@patch("auth.bcrypt.hashpw")
-@patch("auth.bcrypt.gensalt")
-def test_password_hash_data_transofrmations(mock_gensalt, mock_hashpw):
+@patch("backend.app.core.auth.bcrypt.hashpw")
+@patch("backend.app.core.auth.bcrypt.gensalt")
+def test_password_hash_data_transformations(mock_gensalt, mock_hashpw):
     mock_gensalt.return_value = b"fake_salt_bytes"
     mock_hashpw.return_value = b"fake_hashed_password_bytes"
 

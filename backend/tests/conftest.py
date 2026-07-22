@@ -12,18 +12,60 @@ from sqlalchemy.pool import StaticPool
 import backend.app.core.auth as auth
 from backend.app.db.database import Base, get_db
 from backend.app.main import app
+from backend.app.models.monitor import Monitor, MonitorStatus
+from backend.app.models.ping_history import PingHistory
 from backend.app.models.user import User
 from backend.app.models.workspace import Workspace, WorkspaceUser
 
-SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"  # RAM
-
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL,
-    connect_args={"check_same_thread": False},
-    poolclass=StaticPool,  # same conexion for the test suite
+POSTGRESQL_DATABASE_URL = (
+    "postgresql://test_user:test_password@localhost:5433/test_db"  # RAM
 )
 
-TestingSessionLocal = sessionmaker(autocommit=False, bind=engine)
+# --- CONFIG ---
+
+
+@pytest.fixture(scope="session")
+def engine():
+
+    engine = create_engine(POSTGRESQL_DATABASE_URL)
+
+    Base.metadata.create_all(bind=engine)
+    yield engine
+    Base.metadata.drop_all(bind=engine)
+
+
+@pytest.fixture(scope="function")
+def db_session(engine):
+    """
+    Createst tables before test and delete them afterwards.
+    Executed before each test function. Offers isolation through transaction rollback.
+    """
+    connection = engine.connect()
+    transaction = connection.begin()
+    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=connection)
+    session = SessionLocal()
+
+    yield session  # here the test function will run
+
+    # after test function, rollback the transaction and close the session
+    session.close()
+    transaction.rollback()
+    connection.close()
+
+
+@pytest.fixture(scope="function")
+def client(db_session):
+    """Test client that mimics test database."""
+
+    def override_get_db():
+        yield db_session
+
+    app.dependency_overrides[get_db] = override_get_db
+
+    with TestClient(app) as test_client:
+        yield test_client
+
+    app.dependency_overrides.clear()
 
 
 # --- AUTH ---
@@ -131,29 +173,71 @@ def unauthorized_workspace(db_session, other_user):
     return workspace
 
 
-# --- CONFIG ---
-@pytest.fixture(scope="function")
-def db_session():
-    """Creates tables before test and delete them afterwards."""
-    Base.metadata.create_all(bind=engine)
-    db = TestingSessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-        Base.metadata.drop_all(bind=engine)
+# --- MONITOR ---
+@pytest.fixture
+def viewer_client(client, other_user):
+    """
+    Authenticates 'other_user' which is a Viewer in member_workspace.
+    """
+    payload = {"email": other_user.email, "password": "Password1234!"}
+    client.post("/login", json=payload)
+    return client
 
 
-@pytest.fixture(scope="function")
-def client(db_session):
-    """Test client that mimics test database."""
+@pytest.fixture
+def sample_monitor(db_session, owned_workspace) -> Monitor:
+    """
+    Creates a sample monitor in the test_user's owned workspace.
+    """
+    monitor: Monitor = Monitor(
+        workspace_id=owned_workspace.id,
+        name="Test API Monitor",
+        url="https://api.example.com/health",
+        interval_minutes=5,
+        status=MonitorStatus.pending.value,
+    )
+    db_session.add(monitor)
+    db_session.commit()
+    db_session.refresh(monitor)
+    return monitor
 
-    def override_get_db():
-        yield db_session
 
-    app.dependency_overrides[get_db] = override_get_db
+@pytest.fixture
+def unauthorized_monitor(db_session, unauthorized_workspace) -> Monitor:
+    """
+    Creates a monitor in a workspace the test_user does not have access to.
+    """
+    monitor: Monitor = Monitor(
+        workspace_id=unauthorized_workspace.id,
+        name="Secret Monitor",
+        url="https://secret.example.com",
+        interval_minutes=10,
+        status=MonitorStatus.up.value,
+    )
+    db_session.add(monitor)
+    db_session.commit()
+    db_session.refresh(monitor)
+    return monitor
 
-    with TestClient(app) as test_client:
-        yield test_client
 
-    app.dependency_overrides.clear()
+# --- PING_HISTORY ---
+@pytest.fixture
+def sample_ping_history(db_session, sample_monitor):
+    """Test History Table Fixture"""
+    pings = [
+        PingHistory(
+            monitor_id=sample_monitor.id,
+            status_code=200,
+            latency_ms=150,
+        ),
+        PingHistory(
+            monitor_id=sample_monitor.id,
+            status_code=500,
+            latency_ms=800,
+        ),
+    ]
+    db_session.add_all(pings)
+    db_session.commit()
+    for ping in pings:
+        db_session.refresh(ping)
+    return pings

@@ -1,0 +1,13 @@
+name: pulsecheck-test
+
+services:
+  test_db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: test_user
+      POSTGRES_PASSWORD: test_password
+      POSTGRES_DB: test_db
+    ports:
+     - "5433:5432"
+    tmpfs:
+      - /var/lib/postgresql/data # RAM temporary volume
