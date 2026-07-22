@@ -5,7 +5,7 @@ Integration tests for authentication routes.
 
 import pytest
 
-from backend.app.models import User
+from backend.app.models.user import User
 
 
 @pytest.mark.integration
