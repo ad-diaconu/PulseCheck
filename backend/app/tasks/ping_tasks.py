@@ -6,12 +6,18 @@ import time
 from datetime import datetime, timezone
 
 import httpx
-from app.core.celery_app import celery_app
-from app.core.logger_setup import logging
-from app.db.database import SessionLocal
-from app.models.monitor import Monitor, MonitorStatus
-from app.models.ping_history import PingHistory
-from app.tasks.alert_tasks import send_email_alert
+
+from backend.app.core.celery_app import celery_app
+from backend.app.core.logger_setup import logging
+from backend.app.db.database import SessionLocal
+from backend.app.models.monitor import Monitor, MonitorStatus
+from backend.app.models.ping_history import PingHistory
+from backend.app.models.user import User, UserRole
+from backend.app.models.workspace import Workspace, WorkspaceUser
+from backend.app.tasks.alert_tasks import (
+    send_email_alert,
+    send_recovery_alert,
+)
 
 logger = logging.getLogger("fastapi_app")
 
@@ -61,7 +67,7 @@ def ping_website(monitor_id: str, website_url: str):
 
     try:
         with SessionLocal() as db:
-            monitor = db.query(Monitor).filetr(Monitor.id == monitor_id).first()
+            monitor = db.query(Monitor).filter(Monitor.id == monitor_id).first()
             if not monitor or monitor.status == "paused":
                 return  # cant do anything if monitor was deleted or put on hold
 
@@ -84,6 +90,9 @@ def ping_website(monitor_id: str, website_url: str):
                     extra={"monitor_id": monitor_id, "url": website_url},
                 )
                 # TODO: send_recovery_alert.delay() - notify client that website is back up
+                send_recovery_alert.delay(
+                    monitor_id=monitor_id, website_url=website_url
+                )
 
             elif not current_state_is_up and previous_state_is_up:
                 # website crashed ( UP -> DOWN )
@@ -99,7 +108,7 @@ def ping_website(monitor_id: str, website_url: str):
                 )
             else:
                 logger.info(
-                    "Ping successful. State unchanged ({monitor.status})",
+                    f"Ping successful. State unchanged ({monitor.status})",
                     extra={
                         "monitor_id": monitor_id,
                         "status": status_code,

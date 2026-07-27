@@ -16,9 +16,10 @@ load_dotenv()
 DATABASE_URL = os.getenv("DATABASE_URL")
 
 # engine = connection pool - one per app process, not per request
-engine = create_engine(DATABASE_URL)
+# pool_pre_ping = checks if connections its still up before using it; if not it recreates it without breaking the app
+engine = create_engine(DATABASE_URL, pool_pre_ping=True)
 
-# each request gets its won session, then its closed
+# each request gets its own session, then its closed
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
