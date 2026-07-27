@@ -1,7 +1,14 @@
 # conftest.py
 """
-Global pyest fixtures and test database setup.
+Global pytest fixtures and test database setup.
 """
+
+import os
+
+POSTGRESQL_DATABASE_URL = (
+    "postgresql://test_user:test_password@localhost:5433/test_db"  # RAM
+)
+os.environ["DATABASE_URL"] = POSTGRESQL_DATABASE_URL
 
 import pytest
 from fastapi.testclient import TestClient
@@ -17,13 +24,8 @@ from backend.app.models.ping_history import PingHistory
 from backend.app.models.user import User
 from backend.app.models.workspace import Workspace, WorkspaceUser
 
-POSTGRESQL_DATABASE_URL = (
-    "postgresql://test_user:test_password@localhost:5433/test_db"  # RAM
-)
 
 # --- CONFIG ---
-
-
 @pytest.fixture(scope="session")
 def engine():
 
@@ -241,3 +243,40 @@ def sample_ping_history(db_session, sample_monitor):
     for ping in pings:
         db_session.refresh(ping)
     return pings
+
+
+# --- CELERY TASKS ---
+
+
+@pytest.fixture
+def monitor_1_min(db_session, owned_workspace) -> Monitor:
+    """
+    Monitor configured to retry ping at URL every minute.
+    """
+    monitor: Monitor = Monitor(
+        workspace_id=owned_workspace.id,
+        name="1 Min Monitor",
+        url="https://test1.com",
+        interval_minutes=1,
+        status=MonitorStatus.up.value,
+    )
+    db_session.add(monitor)
+    db_session.commit()
+    return monitor
+
+
+@pytest.fixture
+def monitor_5_min(db_session, owned_workspace) -> Monitor:
+    """
+    Monitor configured to retry ping at URL once every 5 minutes.
+    """
+    monitor: Monitor = Monitor(
+        workspace_id=owned_workspace.id,
+        name="5 Min Monitor",
+        url="https://test2.com",
+        interval_minutes=5,
+        status=MonitorStatus.up.value,
+    )
+    db_session.add(monitor)
+    db_session.commit()
+    return monitor

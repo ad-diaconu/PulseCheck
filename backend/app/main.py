@@ -35,8 +35,6 @@ app.add_middleware(
 
 # app.include_router(api_router, prefix="/api/v1", tags=["API v1"])
 app.include_router(api_router)
-# TODO: centralize routers into refactored backend/api and import only the api router which includes all other routers
-# TODO: follow the same router naming convention for all routes
 
 
 @app.exception_handler(AppError)
