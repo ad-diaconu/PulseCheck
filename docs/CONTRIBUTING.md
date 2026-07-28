@@ -73,7 +73,7 @@ random-branch-name         # no type prefix
 ### Format
 
 ```bash
-<type>[optional socpe]: <description>
+<type>[optional scope]: <description>
 
 [optional body]
 
@@ -85,8 +85,7 @@ scope = which part of the proiect is changed/affected (auth,api,readme)
 ### Commit Types
 
 - **`feat`** - a new feature
-- **`fix`** - a buf fix
-- **`fix`** - a buf fix
+- **`fix`** - a bug fix
 - **`docs`** - documentation only changes
 - **`style`** - code style changes (formatting, missing semicolongs,etc.)
 - **`refactor`** - code refactoring without feature changes or bug fixes
@@ -121,7 +120,7 @@ WIP
 Add `!` after the type and a `BREAKING CHANGE:` footer:
 
 ```bash
-[scope]!:
+<type>[scope]!: description
 
 [optional body]
 
