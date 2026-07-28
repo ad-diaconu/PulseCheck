@@ -24,18 +24,75 @@
 
 ---
 
-# 📂 Folder Structure
+# 📂 Backend Folder Structure
 
 ```text
-pulse-check/
-├── backend/                  # FastAPI application & Celery workers
-│   ├── app/                  # Core API logic, models, schemas, and routes
-│   ├── migrations/           # Alembic versioning and migration scripts
-│   ├── alembic.ini           # Alembic configuration
-│   └── pyproject.toml        # Python dependencies managed by uv
-├── frontend/                 # React Single Page Application (SPA)
-├── docker-compose.yml        # Infrastructure services (PostgreSQL, Redis)
-└── README.md
+backend/
+├── app/                              # Main application package
+│   ├── api/                          # API endpoints
+│   │   ├── v1/                       # API v1 routes
+│   │   │   ├── auth.py               # Authentication endpoints
+│   │   │   ├── monitor.py            # Monitor management endpoints
+│   │   │   ├── ping_history.py       # Ping history endpoints
+│   │   │   ├── protected.py          # Protected/test endpoints
+│   │   │   ├── router.py             # API router aggregation
+│   │   │   └── workspace.py          # Workspace management endpoints
+│   │   └── __init__.py
+│   │
+│   ├── core/                         # Core application configuration
+│   │   ├── auth.py                   # JWT authentication & authorization utilities
+│   │   ├── celery_app.py             # Celery application configuration
+│   │   ├── exceptions.py             # Custom exception handlers
+│   │   ├── logger_setup.py           # Logging configuration
+│   │   └── __init__.py
+│   │
+│   ├── db/                           # Database configuration
+│   │   ├── database.py               # SQLAlchemy engine & session management
+│   │   └── __init__.py
+│   │
+│   ├── models/                       # SQLAlchemy ORM models
+│   │   ├── monitor.py                # Monitor database model
+│   │   ├── ping_history.py           # Ping history model
+│   │   ├── user.py                   # User model
+│   │   ├── workspace.py              # Workspace model
+│   │   └── __init__.py
+│   │
+│   ├── schemas/                      # Pydantic request & response schemas
+│   │   ├── monitor.py                # Monitor schemas
+│   │   ├── ping_history.py           # Ping history schemas
+│   │   ├── user.py                   # User schemas
+│   │   ├── workspace.py              # Workspace schemas
+│   │   └── __init__.py
+│   │
+│   ├── services/                     # Business logic layer
+│   │   ├── monitor_service.py        # Monitor-related business logic
+│   │   ├── workspace_service.py      # Workspace-related business logic
+│   │   └── __init__.py
+│   │
+│   ├── tasks/                        # Background Celery tasks
+│   │   ├── alert_tasks.py            # Alert processing tasks
+│   │   ├── ping_tasks.py             # Ping monitoring tasks
+│   │   └── __init__.py
+│   │
+│   ├── scripts/                      # Utility and data seeding scripts
+│   │   ├── seed.py                   # Seed application data
+│   │   ├── seed_manual_celery.py     # Manual Celery seed script
+│   │   └── __init__.py
+│   │
+│   └── main.py                       # FastAPI application entry point
+│
+├── migrations/                       # Alembic migration scripts
+├── tests/                            # Test suite
+├── .env                              # Environment variables
+├── .env.example                      # Environment variables template
+├── alembic.ini                       # Alembic configuration
+├── docker-compose.yml                # Production Docker Compose
+├── docker-compose.dev.yaml           # Development Docker Compose
+├── docker-compose.test.yaml          # Test Docker Compose
+├── Makefile                          # Common development commands
+├── pyproject.toml                    # Project configuration & dependencies
+├── pytest.ini                        # Pytest configuration
+└── uv.lock                           # Dependency lock file
 ```
 
 ---
