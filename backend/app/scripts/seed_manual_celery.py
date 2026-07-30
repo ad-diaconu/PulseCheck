@@ -18,6 +18,14 @@ def run_celery_seed():
     try:
         print("Starting seeding for Celery & Redis testing...")
 
+        existing_user = (
+            db.query(User).filter_by(email="celery_tester@pulsecheck.com").first()
+        )
+
+        if existing_user:
+            print("Tables already seeded. Skipping seeding process.")
+            return
+
         # create user
         user_id = uuid.uuid4()
         test_user = User(
