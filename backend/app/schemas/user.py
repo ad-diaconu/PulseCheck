@@ -7,8 +7,9 @@ This module defines data validation models for the User module.
 
 import re
 import uuid
+from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict, EmailStr, field_validator
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
 
 # input schemas
@@ -33,6 +34,20 @@ class UserLogin(BaseModel):
     password: str
 
 
+class GoogleTokenRequest(BaseModel):
+    credential: str
+
+
+class OIDCUserpProfileGoogle(BaseModel):
+    """Pydantic schema for Google OIDC validation"""
+
+    email: EmailStr
+    full_name: str | None = Field(default=None, alias="name")
+    avatar_url: str | None = Field(default=None, alias="picture")
+    oauth_id: str = Field(alias="sub")
+    email_verified: bool = False
+
+
 # output schemas ( what api/our server returns )
 class UserResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -40,3 +55,9 @@ class UserResponse(BaseModel):
     email: str
     role: str
     is_active: bool
+    full_name: str | None = None
+    avatar_url: str | None = None
+    email_verified: bool
+    created_at: datetime
+    updated_at: datetime
+    last_login: datetime | None = None
