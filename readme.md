@@ -285,8 +285,24 @@ uv run alembic upgrade head
 
 Start the backend:
 
+Make sure you are in the root directory of the project (`PulseCheck/`).
+
 ```bash
-uv run fastapi dev
+uv run python -m backend.app.main
+```
+
+Start the Celery workers:
+
+terminal 1 - start worker
+
+```bash
+PYTHONPATH=.. uv run celery -A backend.app.core.celery_app worker --loglevel=info
+```
+
+terminal 2 - start scheduler
+
+```bash
+PYTHONPATH=.. uv run celery -A backend.app.core.celery_app beat --loglevel=info
 ```
 
 Start the frontend:
