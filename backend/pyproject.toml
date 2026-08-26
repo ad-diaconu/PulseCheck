@@ -20,6 +20,7 @@ dependencies = [
     "python-dotenv>=1.2.2",
     "python-json-logger>=4.1.0",
     "redis>=8.0.1",
+    "requests>=2.34.2",
     "ruff>=0.15.21",
     "sqlalchemy>=2.0.50",
     "uvicorn>=0.48.0",

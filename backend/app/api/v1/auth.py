@@ -22,7 +22,7 @@ from backend.app.db.database import get_db
 from backend.app.models.user import User
 from backend.app.schemas.user import (
     GoogleTokenRequest,
-    OIDCUserpProfileGoogle,
+    OIDCUserProfileGoogle,
     UserLogin,
     UserResponse,
     UserSignup,
@@ -107,7 +107,7 @@ def login_with_google(
             request_data.credential, google_requests.Request(), GOOGLE_CLIENT_ID
         )
 
-        google_user = OIDCUserpProfileGoogle(**idinfo)
+        google_user = OIDCUserProfileGoogle(**idinfo)
     except ValueError:
         logger.warning("Google login failed: Invalid or expired Google token.")
         raise InvalidCredentialsError("Invalid or expired Google Token")

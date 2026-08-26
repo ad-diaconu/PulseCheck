@@ -38,7 +38,7 @@ class GoogleTokenRequest(BaseModel):
     credential: str
 
 
-class OIDCUserpProfileGoogle(BaseModel):
+class OIDCUserProfileGoogle(BaseModel):
     """Pydantic schema for Google OIDC validation"""
 
     email: EmailStr
