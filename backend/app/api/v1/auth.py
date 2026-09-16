@@ -17,6 +17,7 @@ from google.oauth2 import id_token
 from sqlalchemy.orm import Session
 
 import backend.app.core.auth as auth
+from backend.app.core.auth import ACCESS_TOKEN_EXPIRE_SECONDS
 from backend.app.core.exceptions import InvalidCredentialsError, UserAlreadyExistsError
 from backend.app.db.database import get_db
 from backend.app.models.user import User
@@ -92,6 +93,7 @@ def login(user: UserLogin, response: Response, db: Session = Depends(get_db)):
         httponly=True,
         secure=IS_PRODUCTION,
         samesite="lax",
+        max_age=ACCESS_TOKEN_EXPIRE_SECONDS,
     )
     logger.info(f"User logged in successfully: {user.email}")
     return {"message": "Login successful"}
@@ -153,7 +155,12 @@ def login_with_google(
     )
 
     response.set_cookie(
-        key="access_token", value=jwt_token, httponly=True, secure=False, samesite="lax"
+        key="access_token",
+        value=jwt_token,
+        httponly=True,
+        secure=False,
+        samesite="lax",
+        max_age=ACCESS_TOKEN_EXPIRE_SECONDS,
     )
     logger.info(f"OIDC User logged in successfully: {db_user.email}")
     return {"message": "Google Login successful"}

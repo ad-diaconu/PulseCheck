@@ -17,6 +17,7 @@ from backend.app.core.exceptions import TokenError
 
 SECRET_KEY = os.getenv("SECRET_KEY", "secret_key")
 ALGORITHM = "HS256"  # symmetric key
+ACCESS_TOKEN_EXPIRE_SECONDS = 3600
 
 
 def get_password_hash(password: str) -> str:
@@ -36,7 +37,7 @@ def create_access_token(data: dict) -> str:
     """Creates a valid 1 hour duration JWT token."""
     to_encode = data.copy()
     now = datetime.now(timezone.utc)
-    expire = now + timedelta(hours=1)
+    expire = now + timedelta(seconds=ACCESS_TOKEN_EXPIRE_SECONDS)
     to_encode.update({"exp": expire, "iat": now, "iss": "pulsecheck"})
     return jwt.encode(payload=to_encode, key=SECRET_KEY, algorithm=ALGORITHM)
 
