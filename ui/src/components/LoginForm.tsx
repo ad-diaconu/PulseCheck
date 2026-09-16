@@ -2,14 +2,38 @@ import { useState, type SubmitEvent } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { GoogleIcon } from "../components/GoogleIcon";
+import FormAlert from "../components/FormAlert";
 
-const LoginForm = () => {
+
+export type SigningData = {
+    email: string;
+    password: string;
+};
+
+type Props = {
+    onSubmit: (data: SigningData, resetForm: () => void) => Promise<void>;
+    error: string | null;
+}
+const LoginForm = ({ onSubmit, error }: Props) => {
 
     const [isLoading, setIsLoading] = useState(false);
-    const handleSubmit = (e: SubmitEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: SubmitEvent<HTMLFormElement>) => {
         e.preventDefault()
-        setIsLoading(true);
+        
+        
         //login logic call login api
+        const form = e.currentTarget;
+        const formData = new FormData(form);
+        const email = formData.get("email") as string;
+        const password = formData.get("password") as string;
+        setIsLoading(true);
+        try{
+            await onSubmit({email, password}, () => form.reset());
+        } catch (err) {
+            console.error("Login error:", err);
+        } finally {
+            setIsLoading(false);
+        }
     }
 
     return (
@@ -36,6 +60,7 @@ const LoginForm = () => {
                     <input
                         type="email"
                         id="email"
+                        name="email"
                         placeholder="you@company.com"
                         className="w-full p-2.5 rounded-lg border border-slate-300 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow"
                     />
@@ -54,6 +79,7 @@ const LoginForm = () => {
                     <input
                         type="password"
                         id="password"
+                        name="password"
                         placeholder="••••••••"
                         autoComplete="current-password"
                         className="w-full p-2.5 rounded-lg border border-slate-300 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow"
