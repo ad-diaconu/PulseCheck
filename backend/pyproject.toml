@@ -32,6 +32,7 @@ dependencies = [
 "app/models/user.py" = ["F821"]
 
 [tool.black]
+target-version = ["py313"]
 extend-exclude = '''
 /(
   migrations

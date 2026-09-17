@@ -2,7 +2,6 @@
 Integration tests for the monitor module.
 """
 
-
 import pytest
 
 from backend.app.models.monitor import Monitor, MonitorStatus
