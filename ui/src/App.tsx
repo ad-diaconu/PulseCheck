@@ -1,19 +1,29 @@
 import { createBrowserRouter, createRoutesFromElements, Route, Router, RouterProvider, Navigate } from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext";
 import AuthLayout from "./layouts/AuthLayout";
 import NotFoundPage from './pages/NotFoundPage';
 import MainPage from './pages/MainPage';
 import RegisterPage from './pages/RegisterPage';
 import LoginPage from './pages/LoginPage';
+import ProtectedRoute from "./components/ProtectedRoute";
+import GuestOnlyRoute from "./components/GuestOnlyRoute";
+import Dashboard from "./pages/Dashboard";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
     <>
       <Route path="/" element={<MainPage />} />
 
-      <Route path="auth" element={<AuthLayout />}>
-        <Route index element={<Navigate to="login" replace />} />
-        <Route path="signup" element={<RegisterPage />} />
-        <Route path="login" element={<LoginPage />} />
+      <Route element={<GuestOnlyRoute/>}>
+        <Route path="auth" element={<AuthLayout />}>
+          <Route index element={<Navigate to="login" replace />} />
+          <Route path="signup" element={<RegisterPage />} />
+          <Route path="login" element={<LoginPage />} />
+        </Route>
+      </Route>
+      
+      <Route element={<ProtectedRoute/>}>
+        <Route path="dashboard" element={<Dashboard/>} />
       </Route>
 
       <Route path="*" element={<NotFoundPage />} />
@@ -22,7 +32,11 @@ const router = createBrowserRouter(
 );
 
 const App = () => {
-  return <RouterProvider router={router} />
+  return (
+    <AuthProvider>
+      <RouterProvider router={router} />
+    </AuthProvider>
+  );
 }
 
 export default App;

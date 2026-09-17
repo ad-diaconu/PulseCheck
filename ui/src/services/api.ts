@@ -4,6 +4,7 @@ import { logger } from "../utils/logger"
 
 export const api = axios.create({
     baseURL: 'http://localhost:8000',
+    withCredentials: true,
 })
 
 api.interceptors.response.use(
