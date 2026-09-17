@@ -23,9 +23,9 @@ def send_email_alert(self, monitor_id: str, website_url: str, status_code: int):
     Alerting email task.
     """
     # XXX: currently ping simulations, in the future implement real email logic (SendGrid, Amazons SES, aiosmtplib)
-    reason = (
-        "Timeout/Connexion error" if status_code == 0 else f"HTTP Code {status_code}"
-    )
+    # reason = (
+    #     "Timeout/Connexion error" if status_code == 0 else f"HTTP Code {status_code}"
+    # )
     logger.warning(
         "Alert email sent",
         extra={"monitor_id": monitor_id, "url": website_url, "status": status_code},

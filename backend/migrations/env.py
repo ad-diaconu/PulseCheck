@@ -14,7 +14,6 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-import backend.app.models  # models defined in __init__.py
 from backend.app.db.database import DATABASE_URL, Base  # noqa: E402
 
 # this is the Alembic Config object, which provides

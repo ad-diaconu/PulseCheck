@@ -2,7 +2,6 @@
 Integration tests for the monitor module.
 """
 
-import uuid
 
 import pytest
 
