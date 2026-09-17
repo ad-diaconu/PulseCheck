@@ -25,3 +25,15 @@ dependencies = [
     "sqlalchemy>=2.0.50",
     "uvicorn>=0.48.0",
 ]
+[tool.ruff.lint.per-file-ignores]
+"tests/conftest.py" = ["E402"]
+"app/models/__init__.py" = ["F401"]
+"app/models/monitor.py" = ["F821"]
+"app/models/user.py" = ["F821"]
+
+[tool.black]
+extend-exclude = '''
+/(
+  migrations
+)/
+'''

@@ -12,8 +12,6 @@ from backend.app.core.logger_setup import logging
 from backend.app.db.database import SessionLocal
 from backend.app.models.monitor import Monitor, MonitorStatus
 from backend.app.models.ping_history import PingHistory
-from backend.app.models.user import User, UserRole
-from backend.app.models.workspace import Workspace, WorkspaceUser
 from backend.app.tasks.alert_tasks import (
     send_email_alert,
     send_recovery_alert,

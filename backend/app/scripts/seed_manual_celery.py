@@ -1,10 +1,8 @@
 import uuid
-from datetime import datetime, timezone
 
 from backend.app.core.logger_setup import setup_logging
 from backend.app.db.database import Base, SessionLocal
 from backend.app.models.monitor import Monitor, MonitorStatus
-from backend.app.models.ping_history import PingHistory
 from backend.app.models.user import User, UserRole
 from backend.app.models.workspace import Workspace, WorkspaceUser
 

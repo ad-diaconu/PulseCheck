@@ -11,3 +11,8 @@ services:
      - "5433:5432"
     tmpfs:
       - /var/lib/postgresql/data # RAM temporary volume
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U test_user -d test_db"]
+      interval: 1s
+      timeout: 3s
+      retries: 10

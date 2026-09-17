@@ -344,7 +344,7 @@ def leave_workspace(
     db: Session,
     current_user_id: uuid.UUID,
 ):
-    workspace: Workspace = _get_workspace_or_404(db, workspace_id)
+    workspace: Workspace = _get_workspace_or_404(db, workspace_id)  # noqa: F841
 
     stmt_retrieve_user = select(WorkspaceUser).where(
         WorkspaceUser.user_id == current_user_id,
@@ -379,7 +379,7 @@ def delete_member_from_workspace(
     db: Session,
     current_user_id: uuid.UUID,
 ):
-    workspace = _get_workspace_or_404(db, workspace_id)
+    workspace = _get_workspace_or_404(db, workspace_id)  # noqa: F841
     stmt_check_admin = select(WorkspaceUser).where(
         WorkspaceUser.user_id == current_user_id,
         WorkspaceUser.workspace_id == workspace_id,
