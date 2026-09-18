@@ -8,9 +8,10 @@ on:
   pull_request:
     paths:
       - 'backend/**'
+  workflow_dispatch:
 
 jobs:
-  test:
+  lint-format-test:
     runs-on: ubuntu-latest
 
     services:
