@@ -49,6 +49,8 @@ const LoginForm = ({ onSubmit, error }: Props) => {
                 </p>
             </div>
 
+            <FormAlert type="error" message={error} />
+
             {/* Formular */}
             <form onSubmit={handleSubmit} className="flex flex-col gap-5">
 
