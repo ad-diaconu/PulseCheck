@@ -10,7 +10,7 @@ on:
       - 'backend/**'
 
 jobs:
-  test:
+  lint-format-test:
     runs-on: ubuntu-latest
 
     services:
