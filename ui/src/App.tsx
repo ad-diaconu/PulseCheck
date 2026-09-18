@@ -1,13 +1,13 @@
-import { createBrowserRouter, createRoutesFromElements, Route, Router, RouterProvider, Navigate } from "react-router-dom";
+import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider, Navigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import AuthLayout from "./layouts/AuthLayout";
 import NotFoundPage from './pages/NotFoundPage';
 import MainPage from './pages/MainPage';
 import RegisterPage from './pages/RegisterPage';
 import LoginPage from './pages/LoginPage';
-import ProtectedRoute from "./components/ProtectedRoute";
 import GuestOnlyRoute from "./components/GuestOnlyRoute";
 import Dashboard from "./pages/Dashboard";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 const router = createBrowserRouter(
   createRoutesFromElements(

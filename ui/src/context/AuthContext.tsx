@@ -1,16 +1,8 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import {api} from '../services/api';
+import { AuthContext } from './auth-context-definition';
 
-type AuthContextType = {
-    isAuthenticated: boolean;
-    isLoading: boolean;
-    login: () => void;
-    logout: () => Promise<void>;
-};
-
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-export const AuthProvider = ({children}: {children: React.ReactNode}) => {
+export const AuthProvider = ({children}: {children: ReactNode}) => {
 
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
@@ -20,7 +12,7 @@ export const AuthProvider = ({children}: {children: React.ReactNode}) => {
             try{
                 await api.get("/me");
                 setIsAuthenticated(true)
-            }catch(error:any){
+            }catch{
                 setIsAuthenticated(false);
             }finally{
                 setIsLoading(false);
@@ -38,9 +30,8 @@ export const AuthProvider = ({children}: {children: React.ReactNode}) => {
         try{
             await api.post('/logout')
             setIsAuthenticated(false);
-        }catch(error:any){
-            console.log(error)
-            throw new Error('Logout process could not be done.')
+        }catch(error){
+            throw new Error('Logout process could not be done.', { cause: error })
         }
     }
 
@@ -49,10 +40,4 @@ export const AuthProvider = ({children}: {children: React.ReactNode}) => {
             {children}
         </AuthContext.Provider>
     );
-}               
-
-export const useAuth = () => {
-    const context = useContext(AuthContext);
-    if(!context) throw new Error('useAuthmust be used within AuthProvider');
-    return context;
 }
