@@ -25,7 +25,7 @@ const RegisterPage = () => {
                 await sleep(1000)
             }
             navigate('/auth/login')
-        } catch (error: any) {
+        } catch (error: unknown) {
             if (error instanceof ApiError) {
                 if (error.status === 400) {
                     setGlobalError(error.data?.detail || "User already registered.");
