@@ -1,5 +1,6 @@
 import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider, Navigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
+import {Toaster} from "sonner";
 import AuthLayout from "./layouts/AuthLayout";
 import NotFoundPage from './pages/NotFoundPage';
 import MainPage from './pages/MainPage';
@@ -35,6 +36,7 @@ const App = () => {
   return (
     <AuthProvider>
       <RouterProvider router={router} />
+      <Toaster position="bottom-right" richColors/>
     </AuthProvider>
   );
 }
