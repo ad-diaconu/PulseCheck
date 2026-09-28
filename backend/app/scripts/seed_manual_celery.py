@@ -1,7 +1,7 @@
 import uuid
 
 from backend.app.core.logger_setup import setup_logging
-from backend.app.db.database import Base, SessionLocal
+from backend.app.db.database import SessionLocal
 from backend.app.models.monitor import Monitor, MonitorStatus
 from backend.app.models.user import User, UserRole
 from backend.app.models.workspace import Workspace, WorkspaceUser
@@ -11,7 +11,6 @@ logger = setup_logging()
 
 def run_celery_seed():
     db = SessionLocal()
-    Base.metadata.create_all(bind=db.get_bind())
 
     try:
         print("Starting seeding for Celery & Redis testing...")

@@ -62,3 +62,6 @@ class Workspace(Base):
     monitor_associations: Mapped[list["Monitor"]] = relationship(
         back_populates="workspace", cascade="all, delete-orphan"
     )
+    invitations: Mapped[list["WorkspaceInvitation"]] = relationship(
+        back_populates="workspace", cascade="all, delete-orphan"
+    )

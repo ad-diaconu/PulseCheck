@@ -2,6 +2,7 @@
 
 from backend.app.db.database import Base
 
+from .invitation import WorkspaceInvitation
 from .monitor import Monitor
 from .ping_history import PingHistory
 from .user import User

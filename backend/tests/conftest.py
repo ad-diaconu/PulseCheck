@@ -18,6 +18,7 @@ from sqlalchemy.orm import sessionmaker
 import backend.app.core.auth as auth
 from backend.app.db.database import Base, get_db
 from backend.app.main import app
+from backend.app.models.invitation import WorkspaceInvitation
 from backend.app.models.monitor import Monitor, MonitorStatus
 from backend.app.models.ping_history import PingHistory
 from backend.app.models.user import User
@@ -172,6 +173,25 @@ def unauthorized_workspace(db_session, other_user):
     db_session.commit()
     db_session.refresh(workspace)
     return workspace
+
+
+# --- WORKSPACE INVITATION ---
+@pytest.fixture
+def pending_invitation(db_session, owned_workspace, test_user, other_user):
+    """
+    Creates a pending invitation for other_user to join owned_workspace,
+    sent by test_user (the workspace admin).
+    """
+    invitation = WorkspaceInvitation(
+        workspace_id=owned_workspace.id,
+        invited_user_id=other_user.id,
+        invited_by_user_id=test_user.id,
+        role="Viewer",
+    )
+    db_session.add(invitation)
+    db_session.commit()
+    db_session.refresh(invitation)
+    return invitation
 
 
 # --- MONITOR ---
