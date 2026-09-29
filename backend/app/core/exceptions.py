@@ -67,6 +67,32 @@ class AdminRemovalError(AppError):
         super().__init__(detail=detail, status_code=403)
 
 
+# --- Workspace Invitations ---
+class InvitationNotFoundError(AppError):
+    def __init__(self, detail: str = "The requested invitation does not exist."):
+        super().__init__(detail=detail, status_code=404)
+
+
+class InvitationAlreadyExistsError(AppError):
+    def __init__(
+        self,
+        detail: str = "This user already has a pending invitation to this workspace.",
+    ):
+        super().__init__(detail=detail, status_code=400)
+
+
+class InvitationNotPendingError(AppError):
+    def __init__(self, detail: str = "This invitation has already been responded to."):
+        super().__init__(detail=detail, status_code=400)
+
+
+class InvitationPermissionError(AppError):
+    def __init__(
+        self, detail: str = "You do not have permission to respond to this invitation."
+    ):
+        super().__init__(detail=detail, status_code=403)
+
+
 # --- Monitors ---
 class MonitorNotFoundError(AppError):
     def __init__(self, detail: str = "The requested monitor does not exist."):

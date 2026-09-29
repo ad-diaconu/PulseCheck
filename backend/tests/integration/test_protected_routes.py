@@ -16,9 +16,9 @@ def test_protected_route_me_success(client, user_signup_payload):
 
     assert response.status_code == 200
     data = response.json()
-    assert data["message"] == "Acessed secure data"
-    assert "your_id" in data
-    assert data["your_role"] == "standard_user"
+    assert data["email"] == user_signup_payload["email"]
+    assert data["role"] == "standard_user"
+    assert "id" in data
 
 
 @pytest.mark.integration

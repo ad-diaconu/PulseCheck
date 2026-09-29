@@ -60,3 +60,8 @@ class User(Base):
     workspace_associations: Mapped[list["WorkspaceUser"]] = relationship(
         back_populates="user", cascade="all, delete-orphan"
     )
+    received_invitations: Mapped[list["WorkspaceInvitation"]] = relationship(
+        foreign_keys="WorkspaceInvitation.invited_user_id",
+        back_populates="invited_user",
+        cascade="all, delete-orphan",
+    )
