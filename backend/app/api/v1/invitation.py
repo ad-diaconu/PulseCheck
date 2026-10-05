@@ -14,7 +14,12 @@ from sqlalchemy.orm import Session
 
 from backend.app.core.auth import get_current_user_id
 from backend.app.db.database import get_db
-from backend.app.schemas.invitation import InvitationCreate, InvitationReturn
+from backend.app.schemas.invitation import (
+    InvitationCreate,
+    InvitationReturn,
+    InvitationWithContext,
+    InvitationWithEmail,
+)
 from backend.app.services import invitation_service
 
 logger = logging.getLogger("fastapi_app")
@@ -42,9 +47,24 @@ def create_invitation(
     )
 
 
+@router_workspace_invitation.get(
+    "",
+    response_model=list[InvitationWithEmail],
+    summary="List a workspace's pending invitations",
+)
+def get_workspace_pending_invitations(
+    workspace_id: uuid.UUID,
+    db: Session = Depends(get_db),
+    current_user_id: uuid.UUID = Depends(get_current_user_id),
+):
+    return invitation_service.get_workspace_pending_invitations(
+        workspace_id, db, current_user_id
+    )
+
+
 @router_invitation.get(
     "",
-    response_model=list[InvitationReturn],
+    response_model=list[InvitationWithContext],
     summary="List the current user's pending invitations",
 )
 def get_my_pending_invitations(

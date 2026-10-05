@@ -23,7 +23,7 @@ from backend.app.core.exceptions import (
 )
 from backend.app.models.invitation import InvitationStatus, WorkspaceInvitation
 from backend.app.models.user import User
-from backend.app.models.workspace import WorkspaceUser
+from backend.app.models.workspace import Workspace, WorkspaceUser
 from backend.app.schemas.invitation import InvitationCreate
 from backend.app.services.workspace_service import _ensure_user_has_access
 
@@ -113,19 +113,81 @@ def create_invitation(
     return new_invitation
 
 
-def get_my_pending_invitations(
-    db: Session, current_user_id: uuid.UUID
-) -> list[WorkspaceInvitation]:
-    stmt = select(WorkspaceInvitation).where(
-        WorkspaceInvitation.invited_user_id == current_user_id,
-        WorkspaceInvitation.status == InvitationStatus.pending,
+def get_workspace_pending_invitations(
+    workspace_id: uuid.UUID, db: Session, current_user_id: uuid.UUID
+) -> list[dict]:
+    _ensure_user_has_access(
+        db,
+        workspace_id,
+        current_user_id,
+        require_admin=True,
+        log_msg="User is not authorized to view workspace invitations",
+        error_msg="You are not authorized to view invitations for this workspace.",
     )
-    invitations = list(db.execute(stmt).scalars().all())
+
+    stmt = (
+        select(WorkspaceInvitation, User.email)
+        .join(User, WorkspaceInvitation.invited_user_id == User.id)
+        .where(
+            WorkspaceInvitation.workspace_id == workspace_id,
+            WorkspaceInvitation.status == InvitationStatus.pending,
+        )
+    )
+    results = db.execute(stmt).all()
+    logger.info(
+        "User successfully retrieved workspace pending invitations",
+        extra={
+            "user_id": current_user_id,
+            "workspace_id": workspace_id,
+            "invitation_count": len(results),
+        },
+    )
+    return [
+        {
+            "id": invitation.id,
+            "workspace_id": invitation.workspace_id,
+            "invited_user_id": invitation.invited_user_id,
+            "invited_by_user_id": invitation.invited_by_user_id,
+            "invited_email": email,
+            "role": invitation.role,
+            "status": invitation.status,
+            "created_at": invitation.created_at,
+            "responded_at": invitation.responded_at,
+        }
+        for invitation, email in results
+    ]
+
+
+def get_my_pending_invitations(db: Session, current_user_id: uuid.UUID) -> list[dict]:
+    stmt = (
+        select(WorkspaceInvitation, Workspace.name, User.email)
+        .join(Workspace, WorkspaceInvitation.workspace_id == Workspace.id)
+        .join(User, WorkspaceInvitation.invited_by_user_id == User.id)
+        .where(
+            WorkspaceInvitation.invited_user_id == current_user_id,
+            WorkspaceInvitation.status == InvitationStatus.pending,
+        )
+    )
+    results = db.execute(stmt).all()
     logger.info(
         "User successfully retrieved pending invitations",
-        extra={"user_id": current_user_id, "invitation_count": len(invitations)},
+        extra={"user_id": current_user_id, "invitation_count": len(results)},
     )
-    return invitations
+    return [
+        {
+            "id": invitation.id,
+            "workspace_id": invitation.workspace_id,
+            "workspace_name": workspace_name,
+            "invited_user_id": invitation.invited_user_id,
+            "invited_by_user_id": invitation.invited_by_user_id,
+            "invited_by_email": inviter_email,
+            "role": invitation.role,
+            "status": invitation.status,
+            "created_at": invitation.created_at,
+            "responded_at": invitation.responded_at,
+        }
+        for invitation, workspace_name, inviter_email in results
+    ]
 
 
 def _respond_to_invitation(

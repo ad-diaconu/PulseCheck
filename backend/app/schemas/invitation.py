@@ -27,3 +27,12 @@ class InvitationReturn(BaseModel):
     status: str
     created_at: datetime
     responded_at: datetime | None = None
+
+
+class InvitationWithEmail(InvitationReturn):
+    invited_email: str
+
+
+class InvitationWithContext(InvitationReturn):
+    workspace_name: str
+    invited_by_email: str
