@@ -78,7 +78,53 @@ def test_create_invitation_unauthorized(
 
 @pytest.mark.integration
 @pytest.mark.invitation
-def test_get_my_pending_invitations_success(viewer_client, pending_invitation):
+def test_get_workspace_pending_invitations_success(
+    auth_client, owned_workspace, pending_invitation, other_user
+):
+    """test_user is admin of owned_workspace, which has one pending invitation."""
+    response = auth_client.get(f"/workspaces/{owned_workspace.id}/invitations")
+
+    assert response.status_code == 200
+    data = response.json()
+    assert len(data) == 1
+    assert data[0]["id"] == str(pending_invitation.id)
+    assert data[0]["invited_email"] == other_user.email
+    assert data[0]["status"] == "pending"
+
+
+@pytest.mark.integration
+@pytest.mark.invitation
+def test_get_workspace_pending_invitations_excludes_declined(
+    client, owned_workspace, pending_invitation, test_user, other_user
+):
+    """A declined invitation should not appear in the pending list."""
+    client.post("/login", json={"email": other_user.email, "password": "Password1234!"})
+    decline_response = client.post(f"/invitations/{pending_invitation.id}/decline")
+    assert decline_response.status_code == 200
+
+    client.post("/login", json={"email": test_user.email, "password": "Password1234!"})
+    response = client.get(f"/workspaces/{owned_workspace.id}/invitations")
+
+    assert response.status_code == 200
+    assert response.json() == []
+
+
+@pytest.mark.integration
+@pytest.mark.invitation
+def test_get_workspace_pending_invitations_unauthorized(
+    auth_client, unauthorized_workspace
+):
+    """test_user is not an admin of unauthorized_workspace."""
+    response = auth_client.get(f"/workspaces/{unauthorized_workspace.id}/invitations")
+
+    assert response.status_code == 403
+
+
+@pytest.mark.integration
+@pytest.mark.invitation
+def test_get_my_pending_invitations_success(
+    viewer_client, pending_invitation, owned_workspace, test_user
+):
     """other_user (viewer_client) has one pending invitation."""
     response = viewer_client.get("/invitations")
 
@@ -87,6 +133,8 @@ def test_get_my_pending_invitations_success(viewer_client, pending_invitation):
     assert len(data) == 1
     assert data[0]["id"] == str(pending_invitation.id)
     assert data[0]["status"] == "pending"
+    assert data[0]["workspace_name"] == owned_workspace.name
+    assert data[0]["invited_by_email"] == test_user.email
 
 
 @pytest.mark.integration
