@@ -16,7 +16,7 @@ const LoginPage = () => {
         setError(null);
         try {
             await api.post('/login', data);
-            login()
+            await login()
             navigate('/dashboard');
         } catch (err: unknown) {
             if (err instanceof ApiError) {

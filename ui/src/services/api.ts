@@ -21,7 +21,7 @@ api.interceptors.response.use(
         logger.warning(`API Error ${status}: ${detail}`)
 
         // formatted error that can be used by any component
-        throw new ApiError(detail, status)
+        throw new ApiError(detail, status, error.response.data)
 
     }
 )

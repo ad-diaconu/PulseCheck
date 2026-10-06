@@ -17,7 +17,7 @@ type Props = {
 
 const RegisterForm = ({ onSubmit, error, successMessage }: Props) => {
 
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
     const [validationError, setValidationError] = useState<string | null>(null);
 
     const handleSubmit = async (e: SubmitEvent<HTMLFormElement>) => {
