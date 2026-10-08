@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { api } from "../services/api";
+import { useWorkspace } from "../context/useWorkspace";
 import type { InvitationWithContext } from "../types/invitation";
 import InvitationRow from "../components/InvitationRow";
 
 const InboxPage = () => {
+  const { refetchWorkspaces } = useWorkspace();
   const [invitations, setInvitations] = useState<InvitationWithContext[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [respondingId, setRespondingId] = useState<string | null>(null);
@@ -29,6 +31,12 @@ const InboxPage = () => {
     try {
       await api.post(`/invitations/${invitationId}/accept`);
       setInvitations((prev) => prev.filter((inv) => inv.id !== invitationId));
+      // The backend just added this user to a new workspace. WorkspaceContext
+      // only fetches /workspaces once on mount, so without this it has no
+      // way to know — the new workspace wouldn't show up until a full page
+      // reload remounted the provider. refetchWorkspaces() re-pulls the
+      // list right now, into the same context every other page reads from.
+      await refetchWorkspaces();
       toast.success("Invitation accepted");
     } catch {
       toast.error("Failed to accept invitation");
@@ -61,7 +69,9 @@ const InboxPage = () => {
         {isLoading ? (
           <p className="text-sm text-slate-500">Loading...</p>
         ) : invitations.length === 0 ? (
-          <p className="text-sm text-slate-500">You have no pending invitations.</p>
+          <p className="text-sm text-slate-500">
+            You have no pending invitations.
+          </p>
         ) : (
           <div className="border border-slate-200 rounded-xl divide-y divide-slate-100 bg-white">
             {invitations.map((invitation) => (
