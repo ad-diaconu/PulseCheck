@@ -42,8 +42,16 @@ def run_celery_seed():
         db.commit()  # Save to have valid IDs
 
         # create user-workspace link
+        # NOTE: WorkspaceUser.role is a plain string ("Admin"/"Viewer"), a
+        # completely different concept from the User.role UserRole enum
+        # above (the user's global app role). Using UserRole.admin here
+        # would silently store "admin" (lowercase) instead of "Admin",
+        # which every workspace-permission check in the app (see
+        # workspace_service.py) compares against with ==, so it would
+        # never match and this seeded user would never be recognized as a
+        # workspace admin.
         ws_user = WorkspaceUser(
-            user_id=user_id, workspace_id=workspace_id, role=UserRole.admin
+            user_id=user_id, workspace_id=workspace_id, role="Admin"
         )
         db.add(ws_user)
 

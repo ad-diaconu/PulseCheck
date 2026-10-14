@@ -10,6 +10,7 @@ from freezegun import freeze_time
 
 from backend.app.models.monitor import MonitorStatus
 from backend.app.models.ping_history import PingHistory
+from backend.app.tasks.alert_tasks import send_recovery_alert
 from backend.app.tasks.ping_tasks import ping_website, schedule_active_monitors
 
 
@@ -149,4 +150,26 @@ def test_ping_website_triggers_recovery_alert(
 
     mock_recovery_alert.assert_called_once_with(
         monitor_id=str(monitor_1_min.id), website_url=monitor_1_min.url
+    )
+
+
+@pytest.mark.celery
+@patch("backend.app.tasks.alert_tasks.SessionLocal")
+@patch("backend.app.tasks.alert_tasks._get_workspace_admin_emails")
+@patch("backend.app.tasks.alert_tasks.send_alert_recovery_email")
+def test_send_recovery_alert_emails_workspace_admins(
+    mock_send_email, mock_get_admin_emails, mock_session_local, monitor_1_min
+):
+    mock_db = MagicMock()
+    mock_session_local.return_value.__enter__.return_value = mock_db
+    mock_db.get.return_value = monitor_1_min
+    mock_get_admin_emails.return_value = ["admin@example.com"]
+
+    send_recovery_alert(str(monitor_1_min.id), monitor_1_min.url)
+
+    mock_get_admin_emails.assert_called_once_with(mock_db, monitor_1_min.workspace_id)
+    mock_send_email.assert_called_once_with(
+        to="admin@example.com",
+        monitor_name=monitor_1_min.name,
+        monitor_url=monitor_1_min.url,
     )

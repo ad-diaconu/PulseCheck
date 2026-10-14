@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h2 style="margin:0 0 8px 0; color:#16a34a; font-size:18px;">
+    {{ monitor_name }} is back up
+  </h2>
+  <p style="margin:0 0 20px 0; color:#475569; font-size:14px; line-height:1.5;">
+    We detected that your monitor is responding again.
+  </p>
+
+  <table cellpadding="0" cellspacing="0" style="width:100%; margin-bottom:24px; font-size:14px;">
+    <tr>
+      <td style="padding:6px 0; color:#94a3b8;">URL</td>
+      <td style="padding:6px 0; color:#0f172a;">{{ monitor_url }}</td>
+    </tr>
+  </table>
+
+  <a href="{{ dashboard_url }}" style="display:inline-block; background:#0f172a; color:#ffffff; text-decoration:none; padding:10px 20px; border-radius:8px; font-size:14px; font-weight:600;">
+    View in PulseCheck
+  </a>
+{% endblock %}

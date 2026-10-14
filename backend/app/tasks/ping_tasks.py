@@ -87,7 +87,6 @@ def ping_website(monitor_id: str, website_url: str):
                     "Website RECOVERED",
                     extra={"monitor_id": monitor_id, "url": website_url},
                 )
-                # TODO: send_recovery_alert.delay() - notify client that website is back up
                 send_recovery_alert.delay(
                     monitor_id=monitor_id, website_url=website_url
                 )
