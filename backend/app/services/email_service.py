@@ -32,9 +32,7 @@ def send_alert_down_email(
     )
 
 
-def send_alert_recovery_email(
-    to: str, monitor_name: str, monitor_url: str
-) -> None:
+def send_alert_recovery_email(to: str, monitor_name: str, monitor_url: str) -> None:
     """Notifies a workspace admin that one of their monitors is back up."""
     html = render_template(
         "alert_recovery.html",
