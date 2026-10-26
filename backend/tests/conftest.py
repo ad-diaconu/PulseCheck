@@ -10,6 +10,9 @@ POSTGRESQL_DATABASE_URL = (
 )
 os.environ["DATABASE_URL"] = POSTGRESQL_DATABASE_URL
 
+# Points at docker-compose.test.yaml's test_redis service
+os.environ["REDIS_BROKER_URL"] = "redis://localhost:6380/0"
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
@@ -70,6 +73,17 @@ def client(db_session):
     app.dependency_overrides.clear()
 
 
+@pytest.fixture(scope="function", autouse=True)
+def clean_test_redis():
+    """Flushes the test Redis instance before every test, so verification
+    codes/attempt counters from one test never leak into the next."""
+    from backend.app.core.redis_client import redis_client
+
+    redis_client.flushdb()
+    yield
+    redis_client.flushdb()
+
+
 # --- AUTH ---
 @pytest.fixture(scope="function")
 def user_signup_payload():
@@ -97,7 +111,11 @@ def test_user(db_session):
     Creates a standard user in test db.
     """
     hashed_password = auth.get_password_hash("Password1234!")
-    user = User(email="owner@example.com", hashed_password=hashed_password)
+    user = User(
+        email="owner@example.com",
+        hashed_password=hashed_password,
+        email_verified=True,
+    )
     db_session.add(user)
     db_session.commit()
     db_session.refresh(user)
@@ -107,7 +125,11 @@ def test_user(db_session):
 @pytest.fixture
 def other_user(db_session):
     hashed_password = auth.get_password_hash("Password1234!")
-    user = User(email="other_user@example.com", hashed_password=hashed_password)
+    user = User(
+        email="other_user@example.com",
+        hashed_password=hashed_password,
+        email_verified=True,
+    )
     db_session.add(user)
     db_session.commit()
     db_session.refresh(user)

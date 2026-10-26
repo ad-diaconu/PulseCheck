@@ -31,6 +31,7 @@ def run_celery_seed():
             hashed_password="mock_password_hash",
             role=UserRole.admin,
             is_active=True,
+            email_verified=True,
         )
         db.add(test_user)
 

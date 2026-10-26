@@ -9,6 +9,7 @@ It handles password hashing and sets JWT authentication token securely via HTTP-
 
 import logging
 import os
+import uuid
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, Response, status
@@ -18,22 +19,56 @@ from sqlalchemy.orm import Session
 
 import backend.app.core.auth as auth
 from backend.app.core.auth import ACCESS_TOKEN_EXPIRE_SECONDS
-from backend.app.core.exceptions import InvalidCredentialsError, UserAlreadyExistsError
+from backend.app.core.exceptions import (
+    EmailNotVerifiedError,
+    InvalidCredentialsError,
+    InvalidVerificationCodeError,
+    UserAlreadyExistsError,
+)
 from backend.app.db.database import get_db
 from backend.app.models.user import User
 from backend.app.schemas.user import (
+    EmailVerificationRequest,
     GoogleTokenRequest,
     OIDCUserProfileGoogle,
+    ResendVerificationRequest,
     UserLogin,
     UserResponse,
     UserSignup,
 )
+from backend.app.services.verification_service import (
+    generate_and_store_code,
+    verify_code,
+)
+from backend.app.tasks.email_tasks import send_verification_email_task
 
 IS_PRODUCTION = os.getenv("ENVIRONMENT") == "production"
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 logger = logging.getLogger("fastapi_app")
 
 router_auth = APIRouter(tags=["Authentication"])
+
+
+def _dispatch_verification_email(user_id, email: str) -> None:
+    """Generates a verification code and queues the email that sends it.
+
+    Deliberately does NOT let a broker failure (e.g. Redis briefly
+    unreachable) propagate: by this point the user row is already
+    committed, so raising here would 500 a request that actually
+    succeeded, with no way to retry (a second /signup would just hit
+    "Email already registered"). Worst case on failure, the user is left
+    unverified with no code sent — recoverable via POST /resend-verification
+    once the broker is back, rather than an unrecoverable half-created
+    account.
+    """
+    try:
+        code = generate_and_store_code(user_id)
+        send_verification_email_task.delay(email=email, code=code)
+    except Exception as exc:
+        logger.error(
+            f"Failed to queue verification email for {email}: {exc}",
+            extra={"user_id": str(user_id)},
+        )
 
 
 @router_auth.post(
@@ -53,6 +88,8 @@ def signup(user: UserSignup, db: Session = Depends(get_db)):
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
+
+    _dispatch_verification_email(new_user.id, new_user.email)
 
     logger.info(f"New user registered: {user.email}")
     return new_user
@@ -78,6 +115,10 @@ def login(user: UserLogin, response: Response, db: Session = Depends(get_db)):
             f"Login failed: Invalid credentials for {user.email}",
         )
         raise InvalidCredentialsError("Invalid credentials")
+
+    if not db_user.email_verified:
+        logger.warning(f"Login blocked: {user.email} has not verified their email.")
+        raise EmailNotVerifiedError()
 
     db_user.last_login = datetime.now(timezone.utc)
     db.commit()
@@ -164,3 +205,58 @@ def login_with_google(
     )
     logger.info(f"OIDC User logged in successfully: {db_user.email}")
     return {"message": "Google Login successful"}
+
+
+@router_auth.post("/verify-email")
+def verify_email(payload: EmailVerificationRequest, db: Session = Depends(get_db)):
+    db_user = db.query(User).filter(User.email == payload.email).first()
+
+    # Always call verify_code, even for an unknown email (against a random
+    # id that can never have a stored code), so this endpoint does the
+    # same Redis work (GET + INCR + EXPIRE + hash compare) on every
+    # request. Short-circuiting on "no such user" before touching Redis
+    # would make "unknown email" measurably faster than "known email,
+    # wrong code", letting an attacker enumerate registered emails via
+    # response timing — the same leak /resend-verification is already
+    # written to avoid.
+    lookup_id = db_user.id if db_user else uuid.uuid4()
+    code_is_valid = verify_code(lookup_id, payload.code)
+
+    if not db_user or not code_is_valid:
+        if not db_user:
+            logger.warning(
+                f"Email verification attempted for unknown email: {payload.email}"
+            )
+        else:
+            logger.warning(f"Email verification failed for {payload.email}")
+        raise InvalidVerificationCodeError()
+
+    db_user.email_verified = True
+    db.commit()
+
+    logger.info(f"Email verified: {payload.email}")
+    return {"message": "Email verified successfully"}
+
+
+@router_auth.post("/resend-verification")
+def resend_verification(
+    payload: ResendVerificationRequest, db: Session = Depends(get_db)
+):
+    # Same generic response for "unknown email" and "already verified" —
+    # one branch, one message, so the two can't drift apart and
+    # accidentally leak which emails are registered.
+    db_user = db.query(User).filter(User.email == payload.email).first()
+    generic_response = {
+        "message": "If this email is registered, a new code has been sent."
+    }
+    if not db_user or db_user.email_verified:
+        if not db_user:
+            logger.warning(
+                f"Resend verification requested for unknown email: {payload.email}"
+            )
+        return generic_response
+
+    _dispatch_verification_email(db_user.id, db_user.email)
+
+    logger.info(f"Verification code resent to {payload.email}")
+    return generic_response

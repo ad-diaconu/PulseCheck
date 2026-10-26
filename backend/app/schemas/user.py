@@ -34,6 +34,15 @@ class UserLogin(BaseModel):
     password: str
 
 
+class EmailVerificationRequest(BaseModel):
+    email: EmailStr
+    code: str = Field(min_length=6, max_length=6)
+
+
+class ResendVerificationRequest(BaseModel):
+    email: EmailStr
+
+
 class GoogleTokenRequest(BaseModel):
     credential: str
 

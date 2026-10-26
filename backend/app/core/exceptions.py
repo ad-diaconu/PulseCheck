@@ -37,6 +37,16 @@ class TokenError(AppError):
         super().__init__(detail=detail, status_code=401)
 
 
+class EmailNotVerifiedError(AppError):
+    def __init__(self, detail: str = "Please verify your email before logging in."):
+        super().__init__(detail=detail, status_code=403)
+
+
+class InvalidVerificationCodeError(AppError):
+    def __init__(self, detail: str = "Invalid or expired verification code."):
+        super().__init__(detail=detail, status_code=400)
+
+
 # --- Workspace Core ---
 class WorkspaceCreationError(AppError):
     def __init__(
