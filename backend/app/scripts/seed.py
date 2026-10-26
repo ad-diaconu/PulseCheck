@@ -22,6 +22,7 @@ def seed_test_user():
                 email=test_email,
                 hashed_password=hashed_password,
                 role=UserRole.admin,
+                email_verified=True,
             )
             db.add(user)
             db.commit()

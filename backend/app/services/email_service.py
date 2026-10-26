@@ -45,3 +45,13 @@ def send_alert_recovery_email(to: str, monitor_name: str, monitor_url: str) -> N
         subject=f"[PulseCheck] {monitor_name} is back up",
         html_body=html,
     )
+
+
+def send_verification_email(to: str, code: str) -> None:
+    """Sends a newly registered user their 6-digit email verification code."""
+    html = render_template("verify_email.html", code=code)
+    send_email(
+        to=to,
+        subject="[PulseCheck] Verify your email",
+        html_body=html,
+    )
